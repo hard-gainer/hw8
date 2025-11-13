@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from fastapi import FastAPI
-from pydantic import BaseModel, AfterValidator
-from datetime import datetime
+from pydantic import BaseModel, AfterValidator, Field
+from datetime import date, datetime
 
 
 def validate_names(name: str) -> str:
@@ -18,12 +18,19 @@ def validate_names(name: str) -> str:
     return name
 
 
+AllowedRequestReasons = Literal[
+    "Нет доступа к сети", "Не работает телефон", "Не приходят письма"
+]
+
+
 class Request(BaseModel):
     surname: Annotated[str, AfterValidator(validate_names)]
     name: Annotated[str, AfterValidator(validate_names)]
-    birth_date: datetime
+    birth_date: date
     phone_number: str
     email: str
+    reasons: list[AllowedRequestReasons] = Field(min_length=1)
+    occurrence_date_time: datetime
 
 
 app = FastAPI()
